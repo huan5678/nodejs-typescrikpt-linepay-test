@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo site</title>
+</head>
+<body>
+  <div id="app" class="flex flex-col items-center justify-center gap-4">
+    <%= data %>
+    <button type="button" class="px-4 py-2 text-white bg-green-600 border-0 rounded" id="payButton">LINE PAY REQUEST</button>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+  <script>
+    const payButton = document.getElementById('payButton');
+
+    payButton.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/line-pay/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          //body: JSON.stringify({}) // 傳遞所需的資料，如有需要
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const {info} = result.body;
+          const link = document.createElement('a');
+          link.classList.add('px-4', 'py-2', 'text-white', 'bg-gray-600', 'border-0', 'rounded', 'no-underline');
+          link.textContent = '前往支付';
+          payButton.parentNode.appendChild(link).setAttribute('href', info.paymentUrl.web);
+
+        } else {
+          console.error('Error:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
