@@ -96,7 +96,7 @@ app.post('/line-pay/request', async (req: Request, res: Response, next: NextFunc
         products: [
           {
             name: 'Test product',
-            imageUrl: 'https://picsum.photos/300/300',
+            imageUrl: 'https://source.unsplash.com/random/300x300/?food',
             quantity: 1,
             price: 1000,
           },
