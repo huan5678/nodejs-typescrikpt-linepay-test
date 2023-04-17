@@ -7,9 +7,9 @@
   <title>Demo site</title>
 </head>
 <body>
-  <div id="app" class="flex flex-col items-center justify-center gap-4">
+  <div id="app" class="flex flex-col justify-center w-1/4 h-screen gap-4 mx-auto">
     <%= data %>
-    <button type="button" class="px-4 py-2 text-white bg-green-600 border-0 rounded" id="payButton">LINE PAY REQUEST</button>
+    <button type="button" class="px-4 py-2 text-2xl text-center text-white bg-green-600 border-0 rounded cursor-pointer hover:bg-green-700" id="payButton">LINE PAY REQUEST</button>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
   <script>
@@ -42,7 +42,7 @@
 
     function createButton(content = 'default content', color = 'gray'){
       const link = document.createElement('a');
-      link.classList.add('px-4', 'py-2', 'text-white', `bg-${color}-600`, 'border-0', 'rounded', 'no-underline');
+      link.classList.add('px-4', 'py-2', 'text-2xl', 'text-center', 'text-white', `bg-${color}-600`, 'border-0', 'rounded', 'no-underline', 'cursor-pointer', `hover:bg-${color}-700`);
       link.textContent = content;
       return link;
     }
