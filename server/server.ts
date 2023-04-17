@@ -53,6 +53,7 @@ declare global {
       LINE_PAY_CHANNEL_ID: string;
       LINE_PAY_CHANNEL_SECRET: string;
       LINE_PAY_ENV: 'development' | 'production';
+      NODE_ENV: 'dev' | 'production';
     }
   }
 }
@@ -83,7 +84,11 @@ const orders: Record<string, Order> = {};
 
 app.post('/line-pay/request', async (req: Request, res: Response, next: NextFunction) => {
   const orderId = uuidv4();
-  const confirmUrl = 'https://127.0.0.1:3000/line-pay/confirm';
+  const confirmUrl = `${
+    process.env.NODE_ENV === 'dev'
+      ? 'https://127.0.0.1:3000'
+      : 'https://node-typescript-linepay-test.onrender.com'
+  }/line-pay/confirm`;
   const cancelUrl = 'https://127.0.0.1:3000/line-pay/cancel';
   const order = {
     amount: 1000,
