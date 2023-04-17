@@ -182,9 +182,10 @@ app.post('/line-pay/check-payment', async (req: Request, res: Response, next: Ne
 app.post('/line-pay/payment-details', async (req: Request, res: Response, next: NextFunction) =>
 {
   try {
+    const { transactionId } = req.body;
   const response = await linePay.paymentDetails.send({
     params: {
-      transactionId: req.body.transactionId,
+      transactionId,
     },
   });
     res.send(response);
