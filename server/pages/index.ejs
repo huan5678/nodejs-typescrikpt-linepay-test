@@ -1,51 +1,173 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demo site</title>
-</head>
-<body>
-  <div id="app" class="flex flex-col justify-center w-1/2 h-screen gap-4 mx-auto md:w-1/3 lg:w-1/4">
-    <%= data %>
-    <button type="button" class="px-4 py-2 text-2xl text-center text-white bg-green-600 border-0 rounded cursor-pointer hover:bg-green-700" id="payButton">LINE PAY REQUEST</button>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
-  <script>
-    const payButton = document.getElementById('payButton');
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo site</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+      crossorigin="anonymous"
+    />
+  </head>
+  <style type="text/css">
+    body {
+      margin: 20px 0;
+    }
+    .jumbotron {
+      text-align: center;
+    }
+    .text-left {
+      text-align: left;
+    }
+    .container {
+      max-width: 750px;
+    }
+    form {
+      padding: 40px;
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+    .tappay-field-focus {
+      border-color: #66afe9;
+      outline: 0;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    }
+    .has-error .tappay-field-focus {
+      border-color: #843534;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ce8483;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ce8483;
+    }
+    .has-success .tappay-field-focus {
+      border-color: #2b542c;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #67b168;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #67b168;
+    }
+  </style>
+  <body>
+    <section class="container">
+      <div
+        id="app"
+        class="flex flex-col justify-center w-1/2 h-screen gap-4 mx-auto md:w-1/3 lg:w-1/4"
+      >
+        <%= data %>
+        <button
+          type="button"
+          class="px-4 py-2 text-2xl text-center text-white bg-green-600 border-0 rounded cursor-pointer hover:bg-green-700"
+          id="payButton"
+        >
+          LINE PAY REQUEST
+        </button>
+      </div>
 
-    payButton.addEventListener('click', async () => {
-      try {
-        const response = await fetch('/line-pay/request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          //body: JSON.stringify({}) // 傳遞所需的資料，如有需要
-        });
+      <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email" />
+        </div>
+        <div class="form-group card-number-group">
+          <label for="card-number" class="control-label"><span id="cardtype"></span>卡號</label>
+          <div class="form-control card-number"></div>
+        </div>
+        <div class="form-group expiration-date-group">
+          <label for="expiration-date" class="control-label">卡片到期日</label>
+          <div class="form-control expiration-date" id="tappay-expiration-date"></div>
+        </div>
+        <div class="form-group ccv-group">
+          <label for="ccv" class="control-label">卡片後三碼</label>
+          <div class="form-control ccv"></div>
+        </div>
 
-        if (response.ok) {
-          const result = await response.json();
-          const {info} = result.body;
-          const link = createButton('WEB前往支付', 'gray');
-          const link2 = createButton('APP前往支付', 'cyan');
-          payButton.parentNode.appendChild(link).setAttribute('href', info.paymentUrl.web);
-          payButton.parentNode.appendChild(link2).setAttribute('href', info.paymentUrl.app);
-        } else {
-          console.error('Error:', response.statusText);
+        <button id="submit" type="submit" class="btn btn-default">Pay</button>
+      </form>
+      <br />
+      <pre class="text-left jumbotron" id="curl"></pre>
+      <div class="grid ui centered doubling stackable">
+        <div class="six wide column">
+          <div class="ui segment">
+            <pre class="ui error message" id="message" style="overflow-x: auto"></pre>
+            <pre class="ui info message" id="result" style="overflow-x: auto"></pre>
+            <pre class="ui info message" id="curl" style="overflow-x: auto"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="">
+            <div class="ui center aligned segment">
+                <h2>Neweb Pay Test</h2>
+                <button id="sendButton" class="ui button">Pay with Neweb Pay</button>
+            </div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/@unocss/runtime"></script>
+    <script>
+      const payButton = document.getElementById('payButton');
+
+      payButton.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/line-pay/request', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            //body: JSON.stringify({}) // 傳遞所需的資料，如有需要
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            const {info} = result.body;
+            const link = createButton('WEB前往支付', 'gray');
+            const link2 = createButton('APP前往支付', 'cyan');
+            payButton.parentNode.appendChild(link).setAttribute('href', info.paymentUrl.web);
+            payButton.parentNode.appendChild(link2).setAttribute('href', info.paymentUrl.app);
+          } else {
+            console.error('Error:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error:', error);
         }
-      } catch (error) {
-        console.error('Error:', error);
+      });
+
+      function createButton(content = 'default content', color = 'gray') {
+        const link = document.createElement('a');
+        link.classList.add(
+          'px-4',
+          'py-2',
+          'text-2xl',
+          'text-center',
+          'text-white',
+          `bg-${color}-600`,
+          'border-0',
+          'rounded',
+          'no-underline',
+          'cursor-pointer',
+          `hover:bg-${color}-700`
+        );
+        link.textContent = content;
+        return link;
       }
+    </script>
+    <script>
+
+
+      async function checkout(api_url){
+        const response = await fetch(`/${api_url}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: {}
+        });
+        return response;
+      }
+
+      const sendButton = document.getElementById("sendButton");
+
+      sendButton.addEventListener('click', async () => {
+       const result = await checkout('neweb-pay/build-code')
     });
 
-    function createButton(content = 'default content', color = 'gray'){
-      const link = document.createElement('a');
-      link.classList.add('px-4', 'py-2', 'text-2xl', 'text-center', 'text-white', `bg-${color}-600`, 'border-0', 'rounded', 'no-underline', 'cursor-pointer', `hover:bg-${color}-700`);
-      link.textContent = content;
-      return link;
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
